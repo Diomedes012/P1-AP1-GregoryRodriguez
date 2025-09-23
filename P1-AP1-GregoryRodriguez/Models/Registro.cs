@@ -4,7 +4,7 @@ namespace P1_AP1_GregoryRodriguez.Models;
 public class Registro
 {
     [Key]
-    int Id { get; set; }
-    string Nombres { get; set; }
+    public int Id { get; set; }
+    public string Nombres { get; set; }
 }
 
