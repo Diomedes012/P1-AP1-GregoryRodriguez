@@ -1,6 +1,7 @@
 using P1_AP1_GregoryRodriguez.Components;
 using P1_AP1_GregoryRodriguez.Data;
 using Microsoft.EntityFrameworkCore;
+using P1_AP1_GregoryRodriguez.Services;
 
 namespace P1_AP1_GregoryRodriguez;
 
@@ -17,6 +18,7 @@ public class Program
         var ConnectionString = builder.Configuration.GetConnectionString("ConStr");
 
         builder.Services.AddDbContextFactory<Contexto>(option => option.UseSqlite(ConnectionString));
+        builder.Services.AddScoped<EntradasGuacalesService>();
 
         var app = builder.Build();
 

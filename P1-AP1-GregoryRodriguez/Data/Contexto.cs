@@ -8,6 +8,6 @@ public class Contexto : DbContext
     {
         
     }
-    public DbSet<EntradasGuacales> Registro { get; set; }
+    public DbSet<EntradasGuacales> EntradasGuacales { get; set; }
 }
 
