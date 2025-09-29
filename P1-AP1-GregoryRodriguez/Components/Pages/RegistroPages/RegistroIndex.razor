@@ -1,5 +1,132 @@
-﻿<h3>RegistroIndex</h3>
+﻿@page "/EntradasGuacales/Index"
+@using P1_AP1_GregoryRodriguez.Services
+@using P1_AP1_GregoryRodriguez.Models
+@inject EntradasGuacalesService entradasGuacalesService
+@rendermode InteractiveServer
+
+<PageTitle>Index</PageTitle>
+
+<div class="container">
+	<div class="card shadow-lg">
+		@*Header*@
+		<div class="card-header">
+			<h5 class="card-title">Lista de Entradas de Guacales</h5>
+			<a href="/EntradasGuacales/Create" class="btn btn-primary bi bi-plus-square"> Crear</a>
+		</div>
+		@*Body*@
+		<div class="card-body">
+			<div class="row">
+				<div class="col-3">
+					<label class="form-label"><strong>Filtrar Por: </strong></label>
+				</div>
+
+				<div class="col-4">
+					<label class="form-label"><strong>Busqueda</strong></label>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-3">
+					<InputSelect class="form-select" @bind-Value="Filtro">
+						<option value="" selected disabled>Elija una opcion</option>
+						<option value="Id">Id</option>
+						<option value="Nombre">Nombre Cliente</option>
+						<option value="Cantidad">Cantidad</option>
+						<option value="Precio">Precio</option>
+						<option value="Fecha">Fecha</option>
+					</InputSelect>
+				</div>
+
+				<div class="col-4">
+					<div class="input-group">
+						<input class="form-control" @bind-value="ValorFiltro" placeholder="Buscar" />
+						<button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+					</div>
+				</div>
+				<div class="col-3">
+					<button type="button" class="btn btn-secondary bi bi-arrow-counterclockwise" @onclik="Restablecer"></button>
+				</div>
+			</div>
+
+			<table class="table table-hover mt-3">
+				<thead class="table table-striped text-black">
+					<tr>
+						<th>Id</th>
+						<th>Nombres</th>
+						<th>Cantidad</th>
+						<th>Precio</th>
+						<th>Fecha</th>
+						<th>Opciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach(var guacal in ListaEntradas)
+					{
+						<tr>
+							<td>@guacal.IdEntrada</td>
+							<td>@guacal.NombreCliente</td>
+							<td>@guacal.Cantidad</td>
+							<td>@guacal.Precio</td>
+							<td>@guacal.Fecha</td>
+
+							<td>
+								<a href="/EntradasGuacales/Edit/@guacal.IdEntrada" class="btn btn-outline-primary bi bi-pencil-square"></a>
+								<a href="/EntradasGuacales/Delete/@guacal.IdEntrada" class="btn btn-outline-danger bi bi-trash"></a>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+
+
+		</div>
+
+		<div class="card-footer">
+			<label class="form-label"><strong>Cantidad de Entradas: </strong>@ListaEntradas.Count</label>
+			<label class="form-label"><strong>Monto total: </strong>@ListaEntradas.Sum(a => a.Precio).ToString("n2")</label>
+		</div>
+	</div>
+</div>
 
 @code {
 
+	public List<EntradasGuacales> ListaEntradas { get; set; }
+	public string Filtro { get; set; } = string.Empty;
+	public string ValorFiltro { get; set; } = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		ListaEntradas = await entradasGuacalesService.Listar(e => e.IdEntrada > 0);
+	}
+
+
+	public async Task Buscar()
+	{
+		if(Filtro == "Id")
+		{
+			int id = int.Parse(ValorFiltro);
+			ListaEntradas = await entradasGuacalesService.Listar(e => e.IdEntrada == id);
+		}
+		else if(Filtro == "Nombre")
+		{
+			ListaEntradas = await entradasGuacalesService.Listar(e => e.NombreCliente.Contains(ValorFiltro));
+		}
+		else if(Filtro == "Cantidad")
+		{
+			int cantidad = int.Parse(ValorFiltro);
+			ListaEntradas = await entradasGuacalesService.Listar(e => e.Cantidad == cantidad);
+		}
+		else if(Filtro == "Precio")
+		{
+			double precio = double.Parse(ValorFiltro);
+			ListaEntradas = await entradasGuacalesService.Listar(e => e.Precio == precio);
+		}
+	}
+
+	public async Task Restablecer()
+	{
+		ListaEntradas = await entradasGuacalesService.Listar(e => e.IdEntrada > 0);
+		Filtro = string.Empty;
+		ValorFiltro = string.Empty;
+	}
 }
