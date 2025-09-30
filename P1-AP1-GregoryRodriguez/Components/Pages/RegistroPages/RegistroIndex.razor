@@ -33,7 +33,6 @@
 						<option value="Nombre">Nombre Cliente</option>
 						<option value="Cantidad">Cantidad</option>
 						<option value="Precio">Precio</option>
-						<option value="Fecha">Fecha</option>
 					</InputSelect>
 				</div>
 
@@ -81,6 +80,7 @@
 
 		</div>
 
+		@*Footer*@
 		<div class="card-footer">
 			<label class="form-label"><strong>Cantidad de Entradas: </strong>@ListaEntradas.Count</label>
 			<label class="form-label"><strong>Monto total: </strong>@ListaEntradas.Sum(a => a.Precio).ToString("n2")</label>
