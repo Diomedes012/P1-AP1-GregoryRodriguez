@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/Guacales/Index"
 @using P1_AP1_GregoryRodriguez.Services
 @using P1_AP1_GregoryRodriguez.Models
 @inject EntradasGuacalesService entradasGuacalesService
@@ -15,6 +15,18 @@
 		</div>
 		@*Body*@
 		<div class="card-body">
+			<div class="row mt-3">
+				<div class="col-3">
+					<label class="col-form-label"><strong>Desde</strong></label>
+					<InputDate class="form-control" @bind-Value="Desde"></InputDate>
+				</div>
+
+				<div class="col-3">
+					<label class="col-form-label"><strong>Hasta</strong></label>
+					<InputDate class="form-control" @bind-Value="Hasta"></InputDate>
+				</div>
+			</div>
+
 			<div class="row">
 				<div class="col-3">
 					<label class="form-label"><strong>Filtrar Por: </strong></label>
@@ -33,6 +45,7 @@
 						<option value="Nombre">Nombre Cliente</option>
 						<option value="Cantidad">Cantidad</option>
 						<option value="Precio">Precio</option>
+						<option value="Fecha">Fecha</option>
 					</InputSelect>
 				</div>
 
@@ -98,6 +111,9 @@
 	public string Filtro { get; set; } = string.Empty;
 	public string ValorFiltro { get; set; } = string.Empty;
 
+	public DateTime? Desde { get; set; }
+	public DateTime? Hasta { get; set; }
+
 	protected override async Task OnInitializedAsync()
 	{
 		ListaEntradas = await entradasGuacalesService.Listar(e => e.IdEntrada > 0);
@@ -106,25 +122,42 @@
 
 	public async Task Buscar()
 	{
-		if(Filtro == "Id")
+		var listaFiltrada = await entradasGuacalesService.Listar(e => e.IdEntrada > 0);
+
+		if(!string.IsNullOrEmpty(Filtro))
 		{
-			int id = int.Parse(ValorFiltro);
-			ListaEntradas = await entradasGuacalesService.Listar(e => e.IdEntrada == id);
+			if (Filtro == "Id" && int.TryParse(ValorFiltro, out int id))
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.IdEntrada == id).ToList();
+			}
+			else if (Filtro == "Nombre")
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.NombreCliente.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase)).ToList();
+			}
+			else if (Filtro == "Cantidad" && int.TryParse(ValorFiltro, out int cantidad))
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.Cantidad == cantidad).ToList();
+			}
+			else if (Filtro == "Precio" && double.TryParse(ValorFiltro, out double precio))
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.Precio == precio).ToList();
+			}
+			else if(Filtro == "Fecha")
+			{
+				if(Desde.HasValue)
+				{
+					listaFiltrada = listaFiltrada.Where(e => e.Fecha.Date >= Desde.Value.Date).ToList();
+				}
+				if(Hasta.HasValue)
+				{
+					DateTime fechaHasta = Hasta.Value.Date.AddDays(1).AddSeconds(-1);
+					listaFiltrada = listaFiltrada.Where(e => e.Fecha <= fechaHasta).ToList();
+				}
+			}
 		}
-		else if(Filtro == "Nombre")
-		{
-			ListaEntradas = await entradasGuacalesService.Listar(e => e.NombreCliente.Contains(ValorFiltro));
-		}
-		else if(Filtro == "Cantidad")
-		{
-			int cantidad = int.Parse(ValorFiltro);
-			ListaEntradas = await entradasGuacalesService.Listar(e => e.Cantidad == cantidad);
-		}
-		else if(Filtro == "Precio")
-		{
-			double precio = double.Parse(ValorFiltro);
-			ListaEntradas = await entradasGuacalesService.Listar(e => e.Precio == precio);
-		}
+
+		ListaEntradas = listaFiltrada;
+
 	}
 
 	public async Task Restablecer()
@@ -132,5 +165,7 @@
 		ListaEntradas = await entradasGuacalesService.Listar(e => e.IdEntrada > 0);
 		Filtro = string.Empty;
 		ValorFiltro = string.Empty;
+		Desde = null;
+		Hasta = null;
 	}
 }
