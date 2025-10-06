@@ -8,6 +8,7 @@
 <PageTitle>Create</PageTitle>
 
 <EditForm Model="Entrada" OnValidSubmit="Modificar">
+	<DataAnnotationsValidator/>
 	<div class="container">
 		<div class="card shadow-lg">
 			<div class="card-header text-center">
@@ -23,7 +24,7 @@
 				<div class="mt-3">
 					<label class="form-label">Nombre Cliente</label>
 					<InputText class="form-control" @bind-Value="Entrada.NombreCliente"></InputText>
-					<ValidationMessage class="alert" For="@(() => Entrada.NombreCliente)"></ValidationMessage>
+					<ValidationMessage class="alert text-danger" For="@(() => Entrada.NombreCliente)"></ValidationMessage>
 				</div>
 
 				<div class="mt-3">
@@ -34,13 +35,18 @@
 				<div class="mt-3">
 					<label class="form-label">Cantidad</label>
 					<InputNumber class="form-control" @bind-Value="Entrada.Cantidad"></InputNumber>
-					<ValidationMessage class="alert" For="@(() => Entrada.Cantidad)"></ValidationMessage>
+					<ValidationMessage class="alert text-danger" For="@(() => Entrada.Cantidad)"></ValidationMessage>
 				</div>
 
 				<div class="mt-3">
 					<label class="form-label">Precio</label>
 					<InputNumber class="form-control" @bind-Value="Entrada.Precio"></InputNumber>
-					<ValidationMessage class="alert" For="@(() => Entrada.Precio)"></ValidationMessage>
+					<ValidationMessage class="alert text-danger" For="@(() => Entrada.Precio)"></ValidationMessage>
+				</div>
+
+				<div class="mt-3">
+					<label class="form-label">Importe</label>
+					<input class="form-control" value=@(Entrada.Cantidad* Entrada.Precio) readonly />
 				</div>
 			</div>
 
