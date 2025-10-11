@@ -69,7 +69,13 @@ public class EntradasGuacalesService(IDbContextFactory<Contexto> factory)
             .Where(d => d.IdEntrada == huacal.IdEntrada)
             .ExecuteDeleteAsync();
 
-        contexto.EntradasGuacales.Update(huacal);
+        contexto.EntradasGuacales.Attach(huacal);
+        contexto.Entry(huacal).State = EntityState.Modified;
+
+        foreach (var detalle in huacal.EntradaHuacalDetalle)
+        {
+            contexto.Entry(detalle).State = EntityState.Added;
+        }
 
         await AfectarExistencia(huacal.EntradaHuacalDetalle.ToArray(), TipoOperacion.Suma);
 

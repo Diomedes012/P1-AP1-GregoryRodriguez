@@ -22,6 +22,7 @@ public class Program
         builder.Services.AddDbContextFactory<Contexto>(option => option.UseSqlite(ConnectionString));
         builder.Services.AddScoped<EntradasGuacalesService>();
         builder.Services.AddScoped<TiposHuacalesService>();
+        builder.Services.AddBlazoredToast();
 
         var app = builder.Build();
 

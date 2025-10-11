@@ -1,8 +1,11 @@
 ﻿@page "/EntradasGuacales/Delete/{EntradaId:int}"
 @using P1_AP1_GregoryRodriguez.Services
 @using P1_AP1_GregoryRodriguez.Models
+@using Blazored.Toast.Services
 @inject EntradasGuacalesService entradasGuacalesService
+@inject TiposHuacalesService tiposHuacalesService
 @inject NavigationManager navigationManager
+@inject IToastService toastService
 @rendermode InteractiveServer
 
 <div class="container">
@@ -25,12 +28,37 @@
 			</div> 
 
 			<div class="mt-3">
-				<label class="form-label"><strong>Cantidad: </strong>@Entrada.Cantidad</label>
+				<label class="form-label"><strong>Cantidad Total: </strong>@Entrada.Cantidad</label>
 			</div>
 
 			<div class="mt-3">
-				<label class="form-label"><strong>Precio: </strong>@Entrada.Precio</label>
+				<label class="form-label"><strong>Importe Total: </strong>@Entrada.Precio</label>
 			</div>
+
+			@if (Entrada.EntradaHuacalDetalle.Any())
+			{
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr class="table-warning">
+							<th>Tipo Huacal</th>
+							<th>Cantidad</th>
+							<th>Precio</th>
+							<th>Importe</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var detalle in Entrada.EntradaHuacalDetalle)
+						{
+							<tr>
+								<td>@(ListaTipos.FirstOrDefault(t => t.TipoId == detalle.TipoId)?.Descripcion ?? "N/A")</td>
+								<td>@detalle.Cantidad</td>
+								<td>@detalle.Precio.ToString("C")</td>
+								<td>@((detalle.Cantidad * detalle.Precio).ToString("C"))</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
 		</div>
 
 		<div class="card-footer">
@@ -39,33 +67,39 @@
 		</div>
 	</div>
 </div>
-@if (!string.IsNullOrEmpty(Mensaje))
-{
-	<label class="alert alert-danger">Mensaje</label>
-}
+
 @code {
 	[Parameter]
 	public int EntradaId { get; set; }
 
 	public EntradasGuacales Entrada { get; set; }
-	public string Mensaje { get; set; } = string.Empty;
+	public List<TiposHuacales> ListaTipos { get; set; } = [];
 
 	protected override async Task OnInitializedAsync()
 	{
 		Entrada = await entradasGuacalesService.Buscar(EntradaId);
+
+		ListaTipos = await tiposHuacalesService.Listar(t => true);
+
+		if (Entrada == null)
+		{
+			toastService.ShowWarning($"Entrada no encontrada.");
+			navigationManager.NavigateTo("/Guacales/Index");
+		}
 	}
 
 	public async Task Eliminar()
 	{
 		var eliminado = await entradasGuacalesService.Eliminar(EntradaId);
 
-		if(eliminado)
+		if (eliminado)
 		{
+			toastService.ShowSuccess($"Entrada fue eliminada correctamente.");
 			navigationManager.NavigateTo("/Guacales/Index");
 		}
 		else
 		{
-			Mensaje = "No se pudo eliminar la entrada correctamente";
+			toastService.ShowError("No se pudo eliminar la entrada");
 		}
 	}
 

@@ -1,9 +1,11 @@
 ﻿@page "/EntradasGuacales/Create"
+@using Blazored.Toast.Services
 @using P1_AP1_GregoryRodriguez.Services
 @using P1_AP1_GregoryRodriguez.Models
 @inject EntradasGuacalesService entradasGuacalesService
 @inject TiposHuacalesService tiposHuacalesService
 @inject NavigationManager navigationManager
+@inject IToastService toastService
 @rendermode InteractiveServer
 
 <PageTitle>Create</PageTitle>
@@ -34,19 +36,19 @@
 				</div>
 
 				<div class="mt-3">
-					<label class="form-label">Cantidad</label>
+					<label class="form-label">Cantidad General</label>
 					<InputNumber class="form-control" @bind-Value="Entrada.Cantidad" readonly></InputNumber>
 					<ValidationMessage class="alert text-danger" For="@(() => Entrada.Cantidad)"></ValidationMessage>
 				</div>
 
 				<div class="mt-3">
-					<label class="form-label">Precio</label>
+					<label class="form-label">Precio Promedio</label>
 					<InputNumber class="form-control" @bind-Value="Entrada.Precio" readonly></InputNumber>
 					<ValidationMessage class="alert text-danger" For="@(() => Entrada.Precio)"></ValidationMessage>
 				</div>
 
 				<div class="mt-3">
-					<label class="form-label">Importe</label>
+					<label class="form-label">Importe Total</label>
 					<input class="form-control" value=@(Entrada.Cantidad * Entrada.Precio) readonly />
 				</div>
 
@@ -60,7 +62,7 @@
 								<option value="0">Seleccione un tipo</option>
 								@foreach(var tipo in ListaTipos)
 								{
-									<option value="@tipo.TipoId">@tipo.Descripcion</option>
+									<option value="@tipo.TipoId">@tipo.Descripcion (Existencia: @tipo.Existencia)</option>
 								}
 							</InputSelect>
 						</div>
@@ -115,21 +117,15 @@
 
 			<div class="card-footer text-center">
 				<a href="/Guacales/Index" class="btn btn-secondary bi bi-arrow-left">Volver</a>
-				<button type="submit" class="btn btn-primary bi bi-floppy" @onclik="Crear">Crear</button>
+				<button type="submit" class="btn btn-primary bi bi-floppy">Crear</button>
 			</div>
 		</div>
 		
 	</div>
 </EditForm>
 
-@if(!string.IsNullOrEmpty(Mensaje))
-{
-	<label class="alert alert-danger">Mensaje</label>
-}
-
 @code {
 	public EntradasGuacales Entrada { get; set; } = new EntradasGuacales();
-	public string Mensaje { get; set; } = string.Empty;
 	public List<TiposHuacales> ListaTipos { get; set; } = [];
 	public int TipoId { get; set; }
 	public int CantidadDetalle { get; set; }
@@ -145,16 +141,14 @@
 	{
 		if(TipoId == 0)
 		{
-			Mensaje = "Debe seleccionar un tipo Huacal";
+			toastService.ShowError("Debe elegir un tipo Huacal");
 			return;
 		}
 		if (CantidadDetalle <= 0 || PrecioDetalle <= 0)
 		{
-			Mensaje = "Cantidad y Precio deben ser mayores a cero.";
+			toastService.ShowError("La cantidad del detalle y el precio del detalle no deben ser 0");
 			return;
 		}
-
-		Mensaje = string.Empty;
 
 		var nuevoDetalle = new EntradasHuacalesDetalle
 		{
@@ -181,7 +175,17 @@
 	private void RecalcularTotales()
 	{
 		Entrada.Cantidad = Entrada.EntradaHuacalDetalle.Sum(d => d.Cantidad);
-		Entrada.Precio = 0;
+
+		double importeTotal = Entrada.EntradaHuacalDetalle.Sum(d => d.Cantidad * d.Precio);
+
+		if (Entrada.Cantidad > 0)
+		{
+			Entrada.Precio = importeTotal / Entrada.Cantidad;
+		}
+		else
+		{
+			Entrada.Precio = 0;
+		}
 	}
 
 
@@ -189,7 +193,7 @@
 	{
 		if (!Entrada.EntradaHuacalDetalle.Any())
 		{
-			Mensaje = "Debe agregar al menos un detalle de Guacal.";
+			toastService.ShowError("Debe agregar al menos un detalle de Huacal.");
 			return;
 		}
 
@@ -197,11 +201,12 @@
 
 		if(guardado)
 		{
+			toastService.ShowSuccess("Se guardo correctamente la entrrada");
 			navigationManager.NavigateTo("/Guacales/Index");
 		}
 		else
 		{
-			Mensaje = "No se pudo guardar correctamente";
+			toastService.ShowError("No se pudo guardar correctamente");
 		}
 	}
 }
