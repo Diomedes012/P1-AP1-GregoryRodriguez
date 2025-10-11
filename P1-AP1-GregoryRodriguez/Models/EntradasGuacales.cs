@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace P1_AP1_GregoryRodriguez.Models;
 public class EntradasGuacales
@@ -17,5 +18,8 @@ public class EntradasGuacales
     [Required(ErrorMessage ="El precio es un campo obligatorio")]
     [Range(0.1, double.MaxValue, ErrorMessage = "El precio no puede ser cero o menor")]
     public double Precio { get; set; }
+
+    [InverseProperty("EntradaHuacal")]
+    public virtual ICollection<EntradasHuacalesDetalle> EntradaHuacalDetalle { get; set; } = new List<EntradasHuacalesDetalle>();
 }
 

@@ -1,9 +1,11 @@
 ﻿@page "/EntradasGuacales/Edit/{EntradaId:int}"
+@using Blazored.Toast.Services
 @using P1_AP1_GregoryRodriguez.Services
 @using P1_AP1_GregoryRodriguez.Models
 @inject EntradasGuacalesService entradasGuacalesService
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
+@inject IToastService toastService
 
 <PageTitle>Create</PageTitle>
 
@@ -86,7 +88,7 @@
 		}
 		else
 		{
-			Mensaje = "No se pudo Modificar correctamente";
+			toastService.ShowSuccess("Se modifico exitosamente");
 		}
 	}
 

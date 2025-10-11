@@ -2,6 +2,7 @@ using P1_AP1_GregoryRodriguez.Components;
 using P1_AP1_GregoryRodriguez.Data;
 using Microsoft.EntityFrameworkCore;
 using P1_AP1_GregoryRodriguez.Services;
+using Blazored.Toast;
 
 namespace P1_AP1_GregoryRodriguez;
 
@@ -14,11 +15,13 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
+        builder.Services.AddBlazorBootstrap();
 
         var ConnectionString = builder.Configuration.GetConnectionString("ConStr");
 
         builder.Services.AddDbContextFactory<Contexto>(option => option.UseSqlite(ConnectionString));
         builder.Services.AddScoped<EntradasGuacalesService>();
+        builder.Services.AddScoped<TiposHuacalesService>();
 
         var app = builder.Build();
 
